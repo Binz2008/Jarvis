@@ -1,0 +1,100 @@
+# JARVIS AI System Configuration
+# This file defines the routing and fallback logic for different AI tasks.
+
+# Default model to use if no specific task is matched
+default_task: 'general_chat'
+
+tasks:
+  code_analysis:
+    primary_model: 'codellama:7b-instruct'
+    fallback_models:
+      - 'llama3:8b'
+      - 'deepseek-coder'
+    routing_keywords:
+      - 'code'
+      - 'analyze'
+      - 'debug'
+      - 'fix'
+      - 'explain this function'
+      - 'مراجعة الكود'
+      - 'حلل'
+      - 'اشرح'
+
+  general_chat:
+    primary_model: 'llama3:8b'
+    fallback_models:
+      - 'anthropic/claude-3-sonnet'
+      - 'openai/gpt-4o'
+    routing_keywords:
+      - 'hello'
+      - 'how are you'
+      - 'tell me a joke'
+      - 'مرحبا'
+      - 'كيف حالك'
+
+  trading_signal:
+    primary_model: 'specialized_trading_model_v2' # Example of a fine-tuned model
+    fallback_models:
+      - 'llama3:8b'
+      - 'openai/gpt-4o'
+    routing_keywords:
+      - 'trade'
+      - 'signal'
+      - 'buy'
+      - 'sell'
+      - 'market'
+      - 'BTC'
+      - 'ETH'
+      - 'تداول'
+      - 'إشارة'
+      - 'شراء'
+      - 'بيع'
+      - 'السوق'
+
+
+models:
+  codellama:7b-instruct:
+    priority: 1
+    memory_requirement_mb: 3800
+    enabled: true
+    fallback_for: [code, debug, optimize, document]
+  llama3:8b:
+    priority: 2
+    memory_requirement_mb: 4700
+    enabled: true
+    fallback_for: [text, qa, document]
+  mistral:latest:
+    priority: 3
+    memory_requirement_mb: 4400
+    enabled: true
+    fallback_for: [text, qa]
+  llava:latest:
+    priority: 4
+    memory_requirement_mb: 4700
+    enabled: true
+    fallback_for: [image]
+  zephyr:7b-beta:
+    priority: 5
+    memory_requirement_mb: 4100
+    enabled: true
+    fallback_for: [text, qa]
+  gemma:2b:
+    priority: 6
+    memory_requirement_mb: 1700
+    enabled: true
+    fallback_for: [text, qa]
+
+fallback_chains:
+  code: [codellama:7b-instruct, llama3:8b, mistral:latest, zephyr:7b-beta, gemma:2b]
+  text: [llama3:8b, mistral:latest, zephyr:7b-beta, gemma:2b]
+  image: [llava:latest]
+  qa: [llama3:8b, zephyr:7b-beta, gemma:2b]
+  document: [codellama:7b-instruct, llama3:8b]
+
+retry:
+  max_retries: 2
+  timeout_sec: 30
+
+monitoring:
+  update_interval_ms: 2000
+  alert_on_degraded: true
